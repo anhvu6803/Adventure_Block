@@ -6,13 +6,12 @@ public class Shape : MonoBehaviour
 {
     public GameObject squareShapeImage;
 
+    [HideInInspector]
     public ShapeData CurrentShapeData;
 
     private List<GameObject> currentShape = new List<GameObject>();
     void Start()
     {
-        Debug.Log(CurrentShapeData != null ? "yes" : "no");
-        Debug.Log(CurrentShapeData.board.Length);
         RequestNewShape(CurrentShapeData);
     }
     public void RequestNewShape(ShapeData shapeData)

@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
-public class Grid : MonoBehaviour
+public class GridBoard : MonoBehaviour
 {
     [SerializeField] private int rows = 0;
     [SerializeField] private int columns= 0;
