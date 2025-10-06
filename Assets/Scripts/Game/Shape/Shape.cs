@@ -1,163 +1,123 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class Shape : MonoBehaviour
+public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler,
+    IPointerDownHandler
 {
     public GameObject squareShapeImage;
+    public Vector3 shapeSelectedScale;
 
     [HideInInspector]
     public ShapeData CurrentShapeData;
 
     private List<GameObject> currentShape = new List<GameObject>();
-    void Start()
+    private Vector3 shapeStartScale;
+    private Vector2 dragOffset;
+
+    private RectTransform _transform;
+    private bool isShapeDragable = true;
+    private Canvas _canvas;
+
+    public void Awake()
     {
-        RequestNewShape(CurrentShapeData);
+        shapeStartScale = this.GetComponent<RectTransform>().localScale;
+        _transform = this.GetComponent<RectTransform>();
+        _canvas = GetComponentInParent<Canvas>();
+        isShapeDragable = true;
     }
-    public void RequestNewShape(ShapeData shapeData)
-    {
-        CreateShape(shapeData);
-    }
+    //void Start()
+    //{
+    //    CreateShape(CurrentShapeData);
+    //}
+    //public void RequestNewShape(ShapeData shapeData)
+    //{
+    //    CreateShape(shapeData);
+    //}
     public void CreateShape(ShapeData shapeData)
     {
+        if (shapeData == null || shapeData.board == null) return;
+
         CurrentShapeData = shapeData;
         var totalSquareNumber = GetNumberOfSquares(shapeData);
 
-        while(currentShape.Count <= totalSquareNumber)
+        // Ensure we have exactly totalSquareNumber items in pool
+        if (currentShape.Count < totalSquareNumber)
         {
-            currentShape.Add(Instantiate(squareShapeImage, transform) as GameObject);
+            for (int i = currentShape.Count; i < totalSquareNumber; i++)
+            {
+                var obj = Instantiate(squareShapeImage, transform) as GameObject;
+                currentShape.Add(obj);
+            }
+        }
+        else if (currentShape.Count > totalSquareNumber)
+        {
+            // Deactivate extras (or Destroy if you prefer)
+            for (int i = totalSquareNumber; i < currentShape.Count; i++)
+            {
+                currentShape[i].SetActive(false);
+            }
+            // keep list length as-is to reuse later
         }
 
+        // Reset all items to local zero and deactivate
         foreach (var square in currentShape)
         {
-            square.gameObject.transform.position = Vector3.zero;
-            square.gameObject.SetActive(false);
+            var rt = square.GetComponent<RectTransform>();
+            if (rt != null) rt.localPosition = Vector2.zero;
+            square.SetActive(false);
         }
 
+        // spacing between squares (width/height of prefab)
         var squareRect = squareShapeImage.GetComponent<RectTransform>();
-        var moveDistance = new Vector2(squareRect.rect.width * squareRect.localScale.x, 
-            squareRect.rect.height * squareRect.localScale.y);
+        var moveDistance = new Vector2(
+            squareRect.rect.width * squareRect.localScale.x,
+            squareRect.rect.height * squareRect.localScale.y
+        );
 
         int currentIndexInList = 0;
-
-        for(var row = 0; row < shapeData.rows; row++)
+        for (var row = 0; row < shapeData.rows; row++)
         {
-            for(var column = 0; column < shapeData.columns; column++)
+            for (var column = 0; column < shapeData.columns; column++)
             {
                 if (shapeData.board[row].column[column])
                 {
-                    currentShape[currentIndexInList].SetActive(true);
-                    currentShape[currentIndexInList].GetComponent<RectTransform>().localPosition = 
-                         new Vector2(GetXPositionForShapeSquare(shapeData, column, moveDistance),
-                            GetYPositionForShapeSquare(shapeData, row, moveDistance));
-                    
+                    if (currentIndexInList >= currentShape.Count)
+                    {
+                        Debug.LogWarning("Index out of range - skipping");
+                        continue;
+                    }
+
+                    var sq = currentShape[currentIndexInList];
+                    sq.SetActive(true);
+
+                    // Set localPosition using a simple centered formula:
+                    Vector2 cellPos = GetCellLocalPosition(row, column, moveDistance, shapeData);
+                    sq.GetComponent<RectTransform>().localPosition = cellPos;
+
                     currentIndexInList++;
                 }
             }
         }
     }
-    private float GetYPositionForShapeSquare(ShapeData shapeData, int row, Vector2 mowDistance)
+
+    private Vector2 GetCellLocalPosition(int row, int column, Vector2 moveDistance, ShapeData shapeData)
     {
-        float shiftOnY = 0f;
+        // center coordinates (can be fractional)
+        float centerX = (shapeData.columns - 1) * 0.5f;
+        float centerY = (shapeData.rows - 1) * 0.5f;
 
-        if (shapeData.rows > 1)
-        {
-            if(shapeData.rows % 2 != 0)
-            {
-                var middleSquareIndex = (shapeData.rows - 1) / 2;
-                var multiplier = (shapeData.rows - 1) / 2;
+        // x: (col - center) * spacing
+        float x = (column - centerX) * moveDistance.x;
 
-                if(row < middleSquareIndex)
-                {
-                    shiftOnY = mowDistance.y * 1;
-                    shiftOnY *= multiplier;
-                }
-                else if(row > middleSquareIndex)
-                {
-                    shiftOnY = mowDistance.y * -1;
-                    shiftOnY *= multiplier;
-                }
-            }
-            else
-            {
-                var middleSquareIndex2 = (shapeData.rows == 2) ? 1 : (shapeData.rows / 2);
-                var middleSquareIndex1 = (shapeData.rows == 2) ? 0 : (shapeData.rows - 2);
-                var multiplier = shapeData.rows / 2;
+        // y: (center - row) * spacing  -> row 0 will be top if you want that; 
+        // adjust sign if you want row 0 bottom: use (row - centerY)
+        float y = (centerY - row) * moveDistance.y;
 
-                if (row == middleSquareIndex1 || row == middleSquareIndex2)
-                {
-                    if (row == middleSquareIndex2)
-                        shiftOnY = (mowDistance.y / 2) * -1;
-                    if (row == middleSquareIndex1)
-                        shiftOnY = (mowDistance.y / 2);
-                }
-
-                if (row < middleSquareIndex1 && row > middleSquareIndex2)
-                {
-                    shiftOnY = mowDistance.y * 1;
-                    shiftOnY *= multiplier;
-                }
-
-                else if (row > middleSquareIndex1 && row > middleSquareIndex2)
-                {
-                    shiftOnY = mowDistance.y * -1;
-                    shiftOnY *= multiplier;
-                }
-            }
-        }
-        return shiftOnY;
+        return new Vector2(x, y);
     }
-    public float GetXPositionForShapeSquare(ShapeData shapeData, int column, Vector2 mowDistance)
-    {
-        float shiftOnX = 0f;
 
-        if (shapeData.columns > 1)
-        {
-            if (shapeData.columns % 2 != 0)
-            {
-                var middleSquareIndex = (shapeData.columns - 1) / 2;
-                var multiplier = (shapeData.columns - 1) / 2;
-                if (column < middleSquareIndex)
-                {
-                    shiftOnX = mowDistance.x * -1;
-                    shiftOnX *= multiplier;
-                }
-                else if (column > middleSquareIndex)
-                {
-                    shiftOnX = mowDistance.x * 1;
-                    shiftOnX *= multiplier;
-
-                }
-            }
-        }
-        else
-        {
-            var middleSquareIndex2 = (shapeData.columns == 2) ? 1 : (shapeData.columns / 2);
-            var middleSquareIndex1 = (shapeData.columns == 2) ? 0 : (shapeData.columns - 1);
-            var multiplier = shapeData.columns / 2;
-
-            if (column == middleSquareIndex1 || column == middleSquareIndex2)
-            {
-                if (column == middleSquareIndex2)
-                    shiftOnX = mowDistance.x * -1;
-                if (column == middleSquareIndex1)
-                    shiftOnX = (mowDistance.x / 2) * -1;
-            }
-
-            if (column < middleSquareIndex1 && column > middleSquareIndex2)
-            {
-                shiftOnX = mowDistance.x + -1;
-                shiftOnX *= multiplier;
-            }
-
-            else if(column > middleSquareIndex1 && column > middleSquareIndex2)
-            {
-                shiftOnX = mowDistance.x * 1;
-                shiftOnX *= multiplier;
-            }
-        }
-        return shiftOnX;
-    }
     private int GetNumberOfSquares(ShapeData shapeData)
     {
         int number = 0;
@@ -170,5 +130,58 @@ public class Shape : MonoBehaviour
             }
         }
         return number;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+       
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnBeginDrag");
+
+        this.GetComponent<RectTransform>().localScale = shapeSelectedScale;
+
+        // Tính offset giữa con trỏ và vị trí shape
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            _canvas.transform as RectTransform,
+            eventData.position,
+            eventData.pressEventCamera,
+            out Vector2 localMousePos
+        );
+        dragOffset = (Vector2)_transform.localPosition - localMousePos;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnDrag");
+
+        // Không cần chỉnh anchor/pivot
+        Vector2 localMousePos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            _canvas.transform as RectTransform,
+            eventData.position,
+            _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : eventData.pressEventCamera,
+            out localMousePos
+        );
+
+        _transform.localPosition = localMousePos + dragOffset;
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnEndDrag");
+        this.GetComponent<RectTransform>().localScale = shapeStartScale;
+    }
+
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+
     }
 }
