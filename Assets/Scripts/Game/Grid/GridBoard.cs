@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GridBoard : MonoBehaviour
 {
+    [SerializeField] private ShapeStorage shapeStorage;
     [SerializeField] private int rows = 0;
     [SerializeField] private int columns= 0;
     [SerializeField] private float squareGap = 0.1f;
@@ -14,6 +15,15 @@ public class GridBoard : MonoBehaviour
 
     private Vector2 offset = Vector2.zero;
     private List<GameObject> gridSquares = new List<GameObject>();
+
+    private void OnEnable()
+    {
+        GameEvents.CheckIfShapeCanBePlaced += CheckIfShapeCanBePlaced;
+    }
+    private void OnDisable()
+    {
+        GameEvents.CheckIfShapeCanBePlaced -= CheckIfShapeCanBePlaced;
+    }
     void Start()
     {
         CreateGrid();
@@ -78,6 +88,17 @@ public class GridBoard : MonoBehaviour
             square.GetComponent<RectTransform>().anchoredPosition = new Vector2(startPosition.x + pos_x_offset, startPosition.y - pos_y_offset);
             square.GetComponent<RectTransform>().localPosition = new Vector3(startPosition.x + pos_x_offset, startPosition.y - pos_y_offset, 0);
             columnNumber++;
+        }
+    }
+    private void CheckIfShapeCanBePlaced()
+    {
+        foreach(var square in gridSquares)
+        {
+            var gridSquare = square.GetComponent<GridSquare>();
+            if(gridSquare.CanWeUseThisSquare() == true)
+            {
+                gridSquare.ActivateSquare();
+            }
         }
     }
 }

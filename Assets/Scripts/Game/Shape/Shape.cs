@@ -19,6 +19,8 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
     private RectTransform _transform;
     private bool isShapeDragable = true;
     private Canvas _canvas;
+    private Vector3 startPosition;
+    private bool shapeActive = false;
 
     public void Awake()
     {
@@ -27,14 +29,35 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
         _canvas = GetComponentInParent<Canvas>();
         isShapeDragable = true;
     }
-    //void Start()
-    //{
-    //    CreateShape(CurrentShapeData);
-    //}
-    //public void RequestNewShape(ShapeData shapeData)
-    //{
-    //    CreateShape(shapeData);
-    //}
+    public bool IsOnStartPosition()
+    {
+        return transform.localPosition == startPosition;
+    }
+    public bool IsAnyOfShapeSquareActive()
+    {
+        foreach (var shape in currentShape)
+        {
+            if(shape.gameObject.activeSelf)
+                return true;
+        }
+        return false;
+    }
+    public void DeactivateShape()
+    {
+        if (shapeActive)
+        {
+            foreach(var shape in currentShape)
+            {
+                shape?.GetComponent<ShapeSquare>().DeactivateShape();
+            }
+        }
+        shapeActive = false;
+    }
+    public void RequestNewShape(ShapeData shapeData)
+    {
+        transform.localPosition = startPosition;
+        CreateShape(shapeData);
+    }
     public void CreateShape(ShapeData shapeData)
     {
         if (shapeData == null || shapeData.board == null) return;
@@ -177,6 +200,7 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
     {
         Debug.Log("OnEndDrag");
         this.GetComponent<RectTransform>().localScale = shapeStartScale;
+        GameEvents.CheckIfShapeCanBePlaced();
     }
 
 
