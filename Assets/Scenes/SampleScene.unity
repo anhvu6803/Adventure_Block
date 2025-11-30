@@ -1770,6 +1770,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8257623898796609276, guid: fe330022a14cdeb42a7a994f78896fb9, type: 3}
+      propertyPath: squareShapeImage
+      value: 
+      objectReference: {fileID: 6705124750274636828, guid: 2d8227fa6ed361647a130c105d426b8c, type: 3}
     - target: {fileID: 9057436718444257191, guid: fe330022a14cdeb42a7a994f78896fb9, type: 3}
       propertyPath: m_Name
       value: Shape (1)
@@ -1874,6 +1878,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2019,6 +2024,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8257623898796609276, guid: fe330022a14cdeb42a7a994f78896fb9, type: 3}
+      propertyPath: squareShapeImage
+      value: 
+      objectReference: {fileID: 6705124750274636828, guid: 2d8227fa6ed361647a130c105d426b8c, type: 3}
     - target: {fileID: 9057436718444257191, guid: fe330022a14cdeb42a7a994f78896fb9, type: 3}
       propertyPath: m_Name
       value: Shape (2)
@@ -2403,6 +2412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6ea3042566e0944f9aea96bc4232e2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shapeStorage: {fileID: 1851249692}
   rows: 9
   columns: 9
   squareGap: 3
@@ -2498,6 +2508,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8257623898796609276, guid: fe330022a14cdeb42a7a994f78896fb9, type: 3}
+      propertyPath: squareShapeImage
+      value: 
+      objectReference: {fileID: 6705124750274636828, guid: 2d8227fa6ed361647a130c105d426b8c, type: 3}
     - target: {fileID: 9057436718444257191, guid: fe330022a14cdeb42a7a994f78896fb9, type: 3}
       propertyPath: m_Name
       value: Shape

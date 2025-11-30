@@ -12,6 +12,8 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
     [HideInInspector]
     public ShapeData CurrentShapeData;
 
+    public int totalSquareNumber {  get; set; }
+
     private List<GameObject> currentShape = new List<GameObject>();
     private Vector3 shapeStartScale;
     private Vector2 dragOffset;
@@ -28,6 +30,17 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
         _transform = this.GetComponent<RectTransform>();
         _canvas = GetComponentInParent<Canvas>();
         isShapeDragable = true;
+        startPosition = transform.localPosition;
+        shapeActive = true;
+    }
+    private void OnEnable()
+    {
+        GameEvents.MoveShapeToStartPosition += MoveShapeToStartPosition;
+    }
+    private void OnDisable()
+    {
+        GameEvents.MoveShapeToStartPosition -= MoveShapeToStartPosition;
+
     }
     public bool IsOnStartPosition()
     {
@@ -44,6 +57,7 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
     }
     public void DeactivateShape()
     {
+        Debug.Log("DeactivateShape");
         if (shapeActive)
         {
             foreach(var shape in currentShape)
@@ -52,6 +66,18 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
             }
         }
         shapeActive = false;
+    }
+    public void ActivateShape()
+    {
+        Debug.Log("ActivateShape");
+        if (!shapeActive)
+        {
+            foreach (var shape in currentShape)
+            {
+                shape?.GetComponent<ShapeSquare>().ActivateShape();
+            }
+        }
+        shapeActive = true;
     }
     public void RequestNewShape(ShapeData shapeData)
     {
@@ -63,7 +89,7 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
         if (shapeData == null || shapeData.board == null) return;
 
         CurrentShapeData = shapeData;
-        var totalSquareNumber = GetNumberOfSquares(shapeData);
+        totalSquareNumber = GetNumberOfSquares(shapeData);
 
         // Ensure we have exactly totalSquareNumber items in pool
         if (currentShape.Count < totalSquareNumber)
@@ -166,8 +192,6 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log("OnBeginDrag");
-
         this.GetComponent<RectTransform>().localScale = shapeSelectedScale;
 
         // Tính offset giữa con trỏ và vị trí shape
@@ -179,12 +203,8 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
         );
         dragOffset = (Vector2)_transform.localPosition - localMousePos;
     }
-
     public void OnDrag(PointerEventData eventData)
     {
-        Debug.Log("OnDrag");
-
-        // Không cần chỉnh anchor/pivot
         Vector2 localMousePos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             _canvas.transform as RectTransform,
@@ -195,17 +215,18 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
 
         _transform.localPosition = localMousePos + dragOffset;
     }
-
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("OnEndDrag");
         this.GetComponent<RectTransform>().localScale = shapeStartScale;
         GameEvents.CheckIfShapeCanBePlaced();
     }
-
-
     public void OnPointerDown(PointerEventData eventData)
     {
 
+    }
+         
+    private void MoveShapeToStartPosition()
+    {
+        transform.localPosition = startPosition;
     }
 }
