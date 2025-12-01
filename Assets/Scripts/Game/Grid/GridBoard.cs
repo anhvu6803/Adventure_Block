@@ -15,7 +15,7 @@ public class GridBoard : MonoBehaviour
 
     private Vector2 offset = Vector2.zero;
     private List<GameObject> gridSquares = new List<GameObject>();
-
+    private LineIndicator lineIndicator;
     private void OnEnable()
     {
         GameEvents.CheckIfShapeCanBePlaced += CheckIfShapeCanBePlaced;
@@ -26,6 +26,7 @@ public class GridBoard : MonoBehaviour
     }
     void Start()
     {
+        lineIndicator = GetComponent<LineIndicator>();
         CreateGrid();
     }
     private void CreateGrid()
@@ -44,7 +45,7 @@ public class GridBoard : MonoBehaviour
                 gridSquares[gridSquares.Count - 1].GetComponent<GridSquare>().SquareIndex = squareIndex;
                 gridSquares[gridSquares.Count - 1].transform.SetParent(this.transform);
                 gridSquares[gridSquares.Count - 1].transform.localScale = new Vector3(squareScale, squareScale, squareScale);
-                gridSquares[gridSquares.Count - 1].GetComponent<GridSquare>().SetImage(squareIndex % 2 == 0);
+                gridSquares[gridSquares.Count - 1].GetComponent<GridSquare>().SetImage(lineIndicator.GetGridSquareIndex(squareIndex) % 2 == 0);
                 squareIndex++;
             }
         }
@@ -116,7 +117,24 @@ public class GridBoard : MonoBehaviour
             {
                 gridSquares[squareIndex].GetComponent<GridSquare>().PlaceShapeOnBoard();
             }
-            currentSelectedShape.DeactivateShape();
+
+            var shapeLeft = 0;
+            foreach(var shape in shapeStorage.shapeList)
+            {
+                if(shape.IsOnStartPosition() && shape.IsAnyOfShapeSquareActive() == true)
+                {
+                    shapeLeft++;
+                }
+            }
+
+            if(shapeLeft == 0)
+            {
+                GameEvents.RequestNewShapes();
+            }
+            else
+            {
+                GameEvents.SetShapeInactive();
+            }
         }
         else
         {

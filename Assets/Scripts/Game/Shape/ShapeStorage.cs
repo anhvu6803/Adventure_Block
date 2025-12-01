@@ -4,7 +4,15 @@ using UnityEngine;
 public class ShapeStorage : MonoBehaviour
 {
     [SerializeField] private List<ShapeData> shapeDatas;
-    [SerializeField] private List<Shape> shapeList;
+    [SerializeField] public List<Shape> shapeList;
+    private void OnEnable()
+    {
+        GameEvents.RequestNewShapes += RequestNewShapes;
+    }
+    private void OnDisable()
+    {
+        GameEvents.RequestNewShapes -= RequestNewShapes;
+    }
     void Start()
     {
         foreach (var shape in shapeList)
@@ -25,5 +33,14 @@ public class ShapeStorage : MonoBehaviour
         }
         Debug.LogError("there is no shape selected");
         return null;
+    }
+
+    private void RequestNewShapes()
+    {
+        foreach(var shape in shapeList)
+        {
+            var shapeIndex = UnityEngine.Random.Range(0, shapeDatas.Count);
+            shape.RequestNewShape(shapeDatas[shapeIndex]);
+        }
     }
 }
