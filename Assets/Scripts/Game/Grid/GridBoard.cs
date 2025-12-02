@@ -135,10 +135,86 @@ public class GridBoard : MonoBehaviour
             {
                 GameEvents.SetShapeInactive();
             }
+            CheckIfAnyLineIsCompleted();
         }
         else
         {
             GameEvents.MoveShapeToStartPosition();
         }
+    }
+    private void CheckIfAnyLineIsCompleted()
+    {
+        List<int[]> lines = new List<int[]>();
+
+        //columns
+        foreach(var column in lineIndicator.columnIndexes)
+        {
+            lines.Add(lineIndicator.GetVerticalLine(column));
+        }
+
+        //rows
+        for(var row = 0; row < 9;  row++)
+        {
+            List<int> data = new List<int>(9);
+            for(var index = 0; index < 9; index++)
+            {
+                data.Add(lineIndicator.line_data[row, index]);
+            }
+            
+            lines.Add(data.ToArray());
+        }
+
+        var completedLines = CheckIfSquareAreCompleted(lines);
+
+        if(completedLines > 2)
+        {
+
+        }
+    }
+    private int CheckIfSquareAreCompleted(List<int[]> data)
+    {
+        List<int[]> completedLines = new List<int[]>();
+
+        var linesCompleted = 0;
+        foreach(var line in data)
+        {
+            var lineCompleted = true;
+            foreach(var squareIndex in line)
+            {
+                var comp = gridSquares[squareIndex].GetComponent<GridSquare>();
+                if(comp.SquareOccupied == false)
+                {
+                    lineCompleted = false;
+                }
+            }
+            if(lineCompleted)
+            {
+                completedLines.Add(line);
+            }
+        }
+
+        foreach(var line in completedLines)
+        {
+            var completed = false;
+
+            foreach(var squareIndex in line)
+            {
+                var comp = gridSquares[squareIndex].GetComponent<GridSquare>();
+                comp.Deactivate();
+                completed = true;
+            }
+
+            foreach (var squareIndex in line)
+            {
+                var comp = gridSquares[squareIndex].GetComponent<GridSquare>();
+                comp.ClearOccupied();
+            }
+
+            if (completed)
+            {
+                linesCompleted++;
+            }
+        }
+        return linesCompleted;
     }
 }
