@@ -23,7 +23,6 @@ public class ShapeStorage : MonoBehaviour
     }
     public Shape GetCurrentSelectedShape()
     {
-        Debug.Log("GetCurrentSelectedShape");
         foreach(var shape in shapeList)
         {
             if(shape.IsOnStartPosition() == false && shape.IsAnyOfShapeSquareActive())

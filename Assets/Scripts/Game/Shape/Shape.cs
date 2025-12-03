@@ -81,7 +81,6 @@ public class Shape : MonoBehaviour, IPointerClickHandler, IPointerUpHandler, IBe
     }
     public void ActivateShape()
     {
-        Debug.Log("ActivateShape");
         if (!shapeActive)
         {
             foreach (var shape in currentShape)
