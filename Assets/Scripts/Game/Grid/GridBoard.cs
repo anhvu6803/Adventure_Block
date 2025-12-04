@@ -247,8 +247,7 @@ public class GridBoard : MonoBehaviour
 
         if(validShapes == 0)
         {
-            //GameEvents.GameOver(false);
-            Debug.Log("Game Over");
+            GameEvents.GameOver(false);
         }
     }
     private bool CheckIfShapeCanBePlacedOnGrid(Shape currentShape)
