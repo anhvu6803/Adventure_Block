@@ -7,6 +7,8 @@ public class GameEvents : MonoBehaviour
 
     public static Action<int> AddScore;
 
+    public static Action<int, int> UpdateBestScore;
+
     public static Action CheckIfShapeCanBePlaced;
     
     public static Action MoveShapeToStartPosition;

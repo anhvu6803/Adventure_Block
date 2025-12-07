@@ -5,9 +5,11 @@ using UnityEngine;
 public class ScoreText : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
+
     private bool isNewBestScore = false;
     private BestScoreData bestScoreData = new BestScoreData();
     private int currentScores;
+
     private string bestScoreKey = "bsdat";
     private void Awake()
     {
@@ -23,9 +25,9 @@ public class ScoreText : MonoBehaviour
     }
     private void Start()
     {
-        scoreText.text = "0";
         isNewBestScore = false;
         UpdateScoreText();
+        GameEvents.UpdateBestScore(currentScores, bestScoreData.score);
     }
     private void OnEnable()
     {
@@ -49,7 +51,9 @@ public class ScoreText : MonoBehaviour
         {
             bestScoreData.score = currentScores;
             isNewBestScore = true;
+            SaveBestScore(isNewBestScore);
         }
+        GameEvents.UpdateBestScore(currentScores, bestScoreData.score);
         UpdateScoreText();
     }
     private void UpdateScoreText()
