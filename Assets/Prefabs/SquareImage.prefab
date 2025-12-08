@@ -87,6 +87,7 @@ GameObject:
   - component: {fileID: 1880716306256381591}
   - component: {fileID: 6419025214057163180}
   - component: {fileID: 8054017958932708152}
+  - component: {fileID: 8774400299226506635}
   - component: {fileID: 4793187281124438851}
   - component: {fileID: 55338784889538345}
   m_Layer: 5
@@ -167,6 +168,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   occupiedImage: {fileID: 8617619339511420016}
+--- !u!114 &8774400299226506635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6705124750274636828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d15aad288074c439dbbc599ed0e648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSquareImageSelector
+  squareTextureData: {fileID: 11400000, guid: 428e9cf3891bbd54aa11b395fc05a3eb, type: 2}
+  isUpdateImageOnReachTreshold: 1
 --- !u!61 &4793187281124438851
 BoxCollider2D:
   m_ObjectHideFlags: 0

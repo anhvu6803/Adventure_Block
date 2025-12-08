@@ -1,10 +1,12 @@
 using System.Collections;
+using System.ComponentModel.Design;
 using TMPro;
 using UnityEngine;
 
 public class ScoreText : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
+    public SquareTextureData squareTextureData;
 
     private bool isNewBestScore = false;
     private BestScoreData bestScoreData = new BestScoreData();
@@ -26,6 +28,7 @@ public class ScoreText : MonoBehaviour
     private void Start()
     {
         isNewBestScore = false;
+        squareTextureData.SetStartColor();
         UpdateScoreText();
         GameEvents.UpdateBestScore(currentScores, bestScoreData.score);
     }
@@ -53,8 +56,18 @@ public class ScoreText : MonoBehaviour
             isNewBestScore = true;
             SaveBestScore(isNewBestScore);
         }
+
+        UpdateSquareColor();
         GameEvents.UpdateBestScore(currentScores, bestScoreData.score);
         UpdateScoreText();
+    }
+    private void UpdateSquareColor()
+    {
+        if( GameEvents.UpdateSquareColor != null && currentScores >= squareTextureData.tresholdVal)
+        {
+            squareTextureData.UpdateColors(currentScores);
+            GameEvents.UpdateSquareColor(squareTextureData.currentColor);
+        }
     }
     private void UpdateScoreText()
     {

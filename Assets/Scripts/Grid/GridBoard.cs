@@ -12,22 +12,31 @@ public class GridBoard : MonoBehaviour
     [SerializeField] private Vector2 startPosition = Vector2.zero;
     [SerializeField] private float squareScale = 0.1f;
     [SerializeField] private float everySquareOffset = 0;
+    [SerializeField] private SquareTextureData squareTextureData ;
 
     private Vector2 offset = Vector2.zero;
     private List<GameObject> gridSquares = new List<GameObject>();
     private LineIndicator lineIndicator;
+    private Config.SquareColor currentActiveSquareColor = Config.SquareColor.NotSet;
     private void OnEnable()
     {
         GameEvents.CheckIfShapeCanBePlaced += CheckIfShapeCanBePlaced;
+        GameEvents.UpdateSquareColor += OnUpdateSquareColor;
     }
     private void OnDisable()
     {
         GameEvents.CheckIfShapeCanBePlaced -= CheckIfShapeCanBePlaced;
+        GameEvents.UpdateSquareColor -= OnUpdateSquareColor;
     }
     void Start()
     {
         lineIndicator = GetComponent<LineIndicator>();
         CreateGrid();
+        currentActiveSquareColor = squareTextureData.activeSquareTextures[0].squareColor;
+    }
+    private void OnUpdateSquareColor(Config.SquareColor color)
+    {
+        currentActiveSquareColor = color;
     }
     private void CreateGrid()
     {
@@ -114,7 +123,7 @@ public class GridBoard : MonoBehaviour
         {
             foreach(var squareIndex in squareIndexes)
             {
-                gridSquares[squareIndex].GetComponent<GridSquare>().PlaceShapeOnBoard();
+                gridSquares[squareIndex].GetComponent<GridSquare>().PlaceShapeOnBoard(currentActiveSquareColor);
             }
 
             var shapeLeft = 0;
