@@ -185,9 +185,9 @@ public class GridBoard : MonoBehaviour
 
         var completedLines = CheckIfSquareAreCompleted(lines);
 
-        if(completedLines > 2)
+        if(completedLines >= 2)
         {
-
+            GameEvents.ShowCongratulationWritings();
         }
         var totalScores = 10 * completedLines;
         GameEvents.AddScore(totalScores);
