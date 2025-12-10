@@ -18,6 +18,9 @@ public class GridBoard : MonoBehaviour
     private List<GameObject> gridSquares = new List<GameObject>();
     private LineIndicator lineIndicator;
     private Config.SquareColor currentActiveSquareColor = Config.SquareColor.NotSet;
+    [SerializeField] private List<Config.SquareColor> colorsInTheGrid = new List<Config.SquareColor>();
+    [SerializeField] private List<Config.SquareColor> colorsInTheGridAfterLineRemove = new List<Config.SquareColor>();
+
     private void OnEnable()
     {
         GameEvents.CheckIfShapeCanBePlaced += CheckIfShapeCanBePlaced;
@@ -37,6 +40,25 @@ public class GridBoard : MonoBehaviour
     private void OnUpdateSquareColor(Config.SquareColor color)
     {
         currentActiveSquareColor = color;
+    }
+    private List<Config.SquareColor> GetAllSquareColorsInTheGrid()
+    {
+        var colors = new List<Config.SquareColor>();
+
+        foreach(var square in gridSquares)
+        {
+            var gridSquare = square.GetComponent<GridSquare>();
+            if (gridSquare.SquareOccupied)
+            {
+                var color = gridSquare.GetCurrentColor();
+                if(colors.Contains(color) == false)
+                {
+                    colors.Add(color);
+                }
+            }
+        }
+
+        return colors;
     }
     private void CreateGrid()
     {
@@ -183,15 +205,47 @@ public class GridBoard : MonoBehaviour
             lines.Add(data.ToArray());
         }
 
+        colorsInTheGrid = GetAllSquareColorsInTheGrid();
+
         var completedLines = CheckIfSquareAreCompleted(lines);
 
         if(completedLines >= 2)
         {
             GameEvents.ShowCongratulationWritings();
         }
+
         var totalScores = 10 * completedLines;
-        GameEvents.AddScore(totalScores);
+        var bonusScore = ShouldPlayColorBonusAnimation();
+        GameEvents.AddScore(totalScores + bonusScore);
         CheckIfPlayerLost();
+    }
+    private int ShouldPlayColorBonusAnimation()
+    {
+        colorsInTheGridAfterLineRemove = GetAllSquareColorsInTheGrid();
+
+        Config.SquareColor colorToPlayBonus = Config.SquareColor.NotSet;
+
+        foreach(var squareColor in colorsInTheGrid)
+        {
+            if(colorsInTheGridAfterLineRemove.Contains(squareColor) == false)
+            {
+                colorToPlayBonus = squareColor;
+                Debug.Log(colorToPlayBonus);
+            }
+        }
+
+        if(colorToPlayBonus == Config.SquareColor.NotSet)
+        {
+            return 0;
+        }
+
+        if(colorToPlayBonus == currentActiveSquareColor)
+        {
+            return 0;
+        }
+
+        GameEvents.ShowBonusScreen(colorToPlayBonus);
+        return 50;
     }
     private int CheckIfSquareAreCompleted(List<int[]> data)
     {
