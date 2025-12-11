@@ -3,14 +3,14 @@ using System.ComponentModel.Design;
 using TMPro;
 using UnityEngine;
 
-public class ScoreText : MonoBehaviour
+public class Scores : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
     public SquareTextureData squareTextureData;
 
     private bool isNewBestScore = false;
     private BestScoreData bestScoreData = new BestScoreData();
-    private int currentScores;
+    public int currentScores { get; private set; }
 
     private string bestScoreKey = "bsdat";
     private void Awake()

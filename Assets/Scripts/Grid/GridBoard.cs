@@ -18,18 +18,20 @@ public class GridBoard : MonoBehaviour
     private List<GameObject> gridSquares = new List<GameObject>();
     private LineIndicator lineIndicator;
     private Config.SquareColor currentActiveSquareColor = Config.SquareColor.NotSet;
-    [SerializeField] private List<Config.SquareColor> colorsInTheGrid = new List<Config.SquareColor>();
-    [SerializeField] private List<Config.SquareColor> colorsInTheGridAfterLineRemove = new List<Config.SquareColor>();
+    private List<Config.SquareColor> colorsInTheGrid = new List<Config.SquareColor>();
+    private List<Config.SquareColor> colorsInTheGridAfterLineRemove = new List<Config.SquareColor>();
 
     private void OnEnable()
     {
         GameEvents.CheckIfShapeCanBePlaced += CheckIfShapeCanBePlaced;
         GameEvents.UpdateSquareColor += OnUpdateSquareColor;
+        GameEvents.CheckIfPlayerLost += CheckIfPlayerLost;
     }
     private void OnDisable()
     {
         GameEvents.CheckIfShapeCanBePlaced -= CheckIfShapeCanBePlaced;
         GameEvents.UpdateSquareColor -= OnUpdateSquareColor;
+        GameEvents.CheckIfPlayerLost -= CheckIfPlayerLost;
     }
     void Start()
     {
@@ -217,7 +219,7 @@ public class GridBoard : MonoBehaviour
         var totalScores = 10 * completedLines;
         var bonusScore = ShouldPlayColorBonusAnimation();
         GameEvents.AddScore(totalScores + bonusScore);
-        CheckIfPlayerLost();
+        GameEvents.CheckIfPlayerLost();
     }
     private int ShouldPlayColorBonusAnimation()
     {
